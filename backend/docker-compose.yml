@@ -1,0 +1,8 @@
+services:
+  backend:
+    build: .
+    restart: on-failure:5
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "5000:5000"

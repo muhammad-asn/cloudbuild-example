@@ -1,0 +1,10 @@
+services:
+  backend:
+    image: python:3.10-slim
+    working_dir: /workspace/backend/
+    entrypoint: /bin/bash
+    command:
+      - '-c'
+      - '/workspace/backend/build.ci.sh'
+    volumes:
+      - '.:/workspace'

@@ -1,0 +1,43 @@
+steps:
+  - id: Build 
+    name: gcr.io/cloud-builders/docker
+    args: 
+      - compose
+      - -f
+      - docker-compose-gcb.yml
+      - run
+      - --rm
+      - ${_PROJECT}-${_MODULE}
+    env:
+      - 'WORKDIR=${_MODULE}'
+      - 'VERSION=${SHORT_SHA}'
+
+  - id: Build Image
+    name: gcr.io/cloud-builders/docker
+    args:
+      - "build"
+      - "-t"
+      - '${_REGISTRY_URL}/${_PROJECT}/${_MODULE}:${SHORT_SHA}'
+      - '-t'
+      - "${_REGISTRY_URL}/${_PROJECT}/${_MODULE}"
+      - "--cache-from"
+      - "${_REGISTRY_URL}/${_PROJECT}/${_MODULE}"
+      - "--build-arg"
+      - "BUILDKIT_INLINE_CACHE=1"
+      - "."
+    dir: "${_MODULE}"
+    waitFor:
+      - "Build"
+
+  - id: Push Container Image
+    name: gcr.io/cloud-builders/docker
+    args: 
+      - 'push'
+      - '${_REGISTRY_URL}/${_PROJECT}/${_MODULE}:${SHORT_SHA}'
+    waitFor:
+      - "Build Image"
+
+timeout: 30m
+substitutions:
+  _REGISTRY_URL: docker.io/nuga99
+  _PROJECT: cloudbuild-example
